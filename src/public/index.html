@@ -10,14 +10,16 @@
 </head>
 
 <body>
-	<div id="log">
-		<p></p>
+	<div class="auth_container">
+		<div id="log">
+			<p></p>
+		</div>
+		<form class="loginForm" id="login_form">
+			<input class="name_input" name="username" type="text" placeholder="Enter username" autofocus="true"
+				inputmode="verbatim" maxlength="100" minlength="1" required>
+			<input class="submit_input" type="submit" value="Join">
+		</form>
 	</div>
-	<form class="loginForm" id="login_form">
-		<input class="name_input" name="username" type="text" placeholder="Enter username" autofocus="true"
-			inputmode="verbatim" maxlength="100" minlength="1" required>
-		<input class="submit_input" type="submit" value="Join">
-	</form>
 </body>
 
 <script type="text/javascript" src="/client/main.js"></script>

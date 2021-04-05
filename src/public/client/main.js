@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 						username: storageData.username
 					}
 				))
-			if (data.token && data.token != storageData.token) {
-				localStorage.setItem(LocalStorageName, JSON.stringify(data))
+			if (data && data.token != storageData.token) {
+				localStorage.setItem(LocalStorageName, JSON.stringify({token: data.token, username: data.username}))
 			}
 			location.assign(data.page)
 		}

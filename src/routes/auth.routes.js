@@ -22,26 +22,30 @@ const verifyToken = (req, res) => {
 	let { token, username } = req.body
 
 	try {
-		if (token && jwt.verify(token, config.jwtSecret)) {
-			res.json({ page: `http://localhost:${PORT}/chat` })
-			return true
+		const token_info = jwt.verify(token, config.jwtSecret)
+		if (token_info && !mockdb.includes(username)) {
+			const data = { page: `http://localhost:${PORT}/chat` }
+			if (token_info.username !== username) {
+				token = signToken(username)
+				data.token = token
+				data.username = username
+			}
+			res.json(data)
 		}
 	} catch (err) {
 		if (err instanceof jwt.TokenExpiredError) {
 			token = signToken(username)
-			res.json({ token, username })
+			res.json({ token, username, page: `http://localhost:${PORT}/chat` })
 		} else {
 			console.log(err.toString())
+			res.status(401).json({ message: 'authorization lost, please enter your name again' })
 		}
 	}
-	return false
 }
 
 
 router.post('/', (req, res) => {
-	if (!verifyToken(req, res)) {
-		res.sendFile(path.resolve(dirname, 'src', 'public', 'index.html'))
-	}
+	verifyToken(req, res)
 })
 
 
