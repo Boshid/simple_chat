@@ -19,7 +19,8 @@ const signToken = (username) => {
 }
 const verifyToken = (req, res) => {
 
-	let { token, username } = req.body
+	const { username } = req.body
+	let token = req.header('authorization')
 
 	try {
 		const token_info = jwt.verify(token, config.jwtSecret)
@@ -43,17 +44,25 @@ const verifyToken = (req, res) => {
 	}
 }
 
+const basicAuth = (req, res, next) => {
 
-router.post('/', (req, res) => {
+	if (!req.header('authorization')) {
+		res.redirect('/')
+		return res.status(401).json({ message: 'no authorization, please enter your name' })
+	}
+	next()
+}
+
+
+router.post('/', async (req, res) => {
 	verifyToken(req, res)
 })
 
 
-router.get('/chat', (req, res) => {
+router.get('/chat', basicAuth, async (req, res) => {
 
 	res.sendFile(path.resolve(dirname, 'src', 'public', 'chat.html'))
 })
-
 
 
 router.post('/auth',
@@ -87,5 +96,9 @@ router.post('/auth',
 		}
 	})
 
+
+router.get('/service_worker.js', async (req, res) => {
+	res.sendFile(path.resolve(dirname, 'src', 'public', 'client', 'service_worker.js'))
+})
 
 module.exports = router

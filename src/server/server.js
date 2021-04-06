@@ -5,6 +5,7 @@ const serverRoutes = require('../routes/auth.routes.js')
 const config = require('../config.js')
 const path = require('path')
 const mockdb = require('../server/mockdb.js')
+const helmet = require('helmet')
 
 
 const PORT = process.env.PORT ?? config.port
@@ -30,7 +31,7 @@ const heartbeat = () => {
 // 	})
 // }, 30000)
 
-// app.use(helmet())
+app.use(helmet())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -46,12 +47,12 @@ socketServer.on('connection', socket => {
 	// socket.isAlive = true
 	// socket.on('pong', heartbeat)
 
-	socket.on('userJoin', (username) => {
+	socket.on('userJoin', username => {
 		mockdb.userJoin(socket.id, username);
 		socket.broadcast.emit('chat_message', `${username} has joined the chat`)
 	})
 
-	socket.on('chat_message', (data) => {
+	socket.on('chat_message', data => {
 
 		if (data) {
 			const { username, msg } = JSON.parse(data)
@@ -74,6 +75,6 @@ try {
 		console.log(`waiting for connections on port ${PORT}...`)
 	})
 
-} catch (e) {
-	console.log(e)
+} catch (err) {
+	console.log(err.toString())
 }
