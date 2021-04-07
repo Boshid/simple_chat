@@ -1,28 +1,32 @@
 const LocalStorageName = 'userStorage'
-const username = JSON.parse(localStorage.getItem(LocalStorageName)).username
 const socket = io(location.origin)
 
 
-const heartbeat = () => {
-	clearTimeout(this.pingTimeout)
-	this.pingTimeout = setTimeout(() => {
-		this.terminate()
-	}, 30000 + 1000)
+const getUsername = () => {
+	
+	try {
+		return JSON.parse(localStorage.getItem(LocalStorageName)).username
+	} catch(err) {
+		return ''
+	}
 }
+
+const username = getUsername()
+
 
 const outMessage = message => {
 	chat = document.getElementById('chat_messages')
 	elMsg = document.createElement('li')
 	elMsg.textContent = message
 	chat.appendChild(elMsg)
-	window.scrollTo(0, document.body.scrollHeight);
+	chat.scrollTo(0, chat.scrollHeight);
 }
 
-socket.on('chat_message', message => {
+socket.on('chat_message', async message => {
 	outMessage(message)
 })
 
-socket.on("connect_error", err => {
+socket.on("connect_error", async err => {
 	console.log(`connect_error due to ${err.message}`);
 });
 
@@ -51,4 +55,10 @@ document.getElementById('messages').addEventListener('submit', async event => {
 	elMsg.value = ''
 	elMsg.focus()
 
+})
+
+document.addEventListener('DOMContentLoaded', async () => {
+	if (!username) {
+		location.replace(location.origin)
+	}
 })

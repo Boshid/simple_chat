@@ -6,7 +6,6 @@ const config = require('../config.js')
 const path = require('path')
 
 
-const PORT = process.env.PORT ?? config.port
 const dirname = path.resolve()
 
 const router = Router()
@@ -17,6 +16,7 @@ const signToken = (username) => {
 		config.jwtSecret,
 		{ expiresIn: '1h' })
 }
+
 const verifyToken = (req, res) => {
 
 	const { username } = req.body
@@ -24,33 +24,31 @@ const verifyToken = (req, res) => {
 
 	try {
 		const token_info = jwt.verify(token, config.jwtSecret)
-		if (token_info && !mockdb.includes(username)) {
-			const data = { page: `http://localhost:${PORT}/chat` }
-			if (token_info.username !== username) {
-				token = signToken(username)
-				data.token = token
-				data.username = username
-			}
-			res.json(data)
+		if (mockdb.includes(username)) {
+			res.status(400).json({
+				message: 'User with the same name already in chat'
+			})
+			return false
 		}
-	} catch (err) {
+		if (token_info.username !== username) {
+			token = signToken(username)
+			res.json({ token, username })
+			return false
+		}
+		res.json({})
+		return true
+	}
+	catch (err) {
 		if (err instanceof jwt.TokenExpiredError) {
 			token = signToken(username)
-			res.json({ token, username, page: `http://localhost:${PORT}/chat` })
-		} else {
-			console.log(err.toString())
-			res.status(401).json({ message: 'authorization lost, please enter your name again' })
+			res.json({ token, username })
+			return false
 		}
-	}
-}
+		console.log(err.toString())
+		res.status(401).json({ message: 'authorization lost, please enter your name again' })
+		return false
 
-const basicAuth = (req, res, next) => {
-
-	if (!req.header('authorization')) {
-		res.redirect('/')
-		return res.status(401).json({ message: 'no authorization, please enter your name' })
 	}
-	next()
 }
 
 
@@ -59,7 +57,7 @@ router.post('/', async (req, res) => {
 })
 
 
-router.get('/chat', basicAuth, async (req, res) => {
+router.get('/chat', async (req, res) => {
 
 	res.sendFile(path.resolve(dirname, 'src', 'public', 'chat.html'))
 })

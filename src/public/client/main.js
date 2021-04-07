@@ -51,15 +51,8 @@ document.getElementById('login_form').addEventListener('submit', async event => 
 		))
 	if (data) {
 		localStorage.setItem(LocalStorageName, JSON.stringify(data))
-		// await fetchData('/chat',
-		// 	requestOptions(
-		// 		'GET',
-		// 		{
-		// 			'Authorization': data.token,
-		// 			'Content-Type': 'application/json;charset=utf-8'
-		// 		}
-		// 	))
-		location.assign(location.origin + 'chat')
+
+		location.assign(location.origin + '/chat')
 	}
 
 })
@@ -85,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			if (data && data.token != storageData.token) {
 				localStorage.setItem(LocalStorageName, JSON.stringify({ token: data.token, username: data.username }))
 			}
-			location.assign(data.page)
+			location.assign(location.origin + '/chat')
 		}
 	}
 

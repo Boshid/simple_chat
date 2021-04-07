@@ -8,7 +8,7 @@ const mockdb = require('../server/mockdb.js')
 const helmet = require('helmet')
 
 
-const PORT = process.env.PORT ?? config.port
+const PORT = config.port
 const dirname = path.resolve()
 
 const app = express()
@@ -16,22 +16,9 @@ const serverHttp = http.createServer(app)
 
 const socketServer = ws(serverHttp)
 
-const noop = () => { }
+app.disable('x-powered-by')
 
-const heartbeat = () => {
-	this.isAlive = true
-}
-
-// const interval = setInterval(() => {
-// 	socketServer..forEach((socket) => {
-// 		if (socket.isAlive === false) return socket.terminate()
-
-// 		socket.isAlive = false
-// 		socket.ping(noop)
-// 	})
-// }, 30000)
-
-app.use(helmet())
+app.use(helmet.referrerPolicy({policy: 'origin'}))
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -43,9 +30,6 @@ app.use(serverRoutes)
 
 
 socketServer.on('connection', socket => {
-
-	// socket.isAlive = true
-	// socket.on('pong', heartbeat)
 
 	socket.on('userJoin', username => {
 		mockdb.userJoin(socket.id, username);
@@ -66,6 +50,7 @@ socketServer.on('connection', socket => {
 
 		if (user) {
 			socket.broadcast.emit('chat_message', `${user.username} has left the chat`)
+
 		}
 	})
 })
